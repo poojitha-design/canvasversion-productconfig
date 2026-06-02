@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXT-GEN · Insurance Product Configurator</title>
+<style>
+:root {
+  --green: #3ecf8e;
+  --green-dark: #2ab378;
+  --green-light: #e8faf3;
+  --green-icon: #d1f5e6;
+  --navy: #1a2e38;
+  --bg: #f2f4f0;
+  --surface: #ffffff;
+  --border: #e4e8e2;
+  --text-1: #1a2e38;
+  --text-2: #4a5e6a;
+  --text-3: #8a9eaa;
+  --radius: 12px;
+  --shadow: 0 1px 8px rgba(0,0,0,.06);
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text-1);font-size:14px;}
+
+/* ─── TOPBAR ─── */
+.topbar{background:var(--navy);height:54px;display:flex;align-items:center;padding:0 28px;gap:0;position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;margin-right:32px;cursor:pointer;}
+.logo-icon{width:28px;height:28px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.logo-text{color:#fff;font-weight:800;font-size:15px;letter-spacing:-.2px;}
+.nav{display:flex;align-items:center;gap:2px;}
+.nav-item{color:rgba(255,255,255,.6);font-size:13px;padding:6px 14px;border-radius:7px;cursor:pointer;transition:all .15s;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.1);}
+.nav-item.active{color:#fff;font-weight:600;}
+.nav-spacer{flex:1;}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.ai-fab{display:flex;align-items:center;gap:7px;background:var(--green);color:var(--navy);font-size:13px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;border:none;transition:all .2s;}
+.ai-fab:hover{background:var(--green-dark);box-shadow:0 4px 14px rgba(62,207,142,.4);}
+.icon-action{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.7);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative;}
+.icon-action:hover{background:rgba(255,255,255,.15);}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#ef4444;border-radius:50%;border:2px solid var(--navy);}
+.lang-btn{color:rgba(255,255,255,.7);font-size:12px;padding:5px 10px;border-radius:6px;background:rgba(255,255,255,.08);cursor:pointer;border:none;}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--green);color:var(--navy);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* ─── PAGE SYSTEM ─── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ═══════════════════════════════════
+   DASHBOARD PAGE
+═══════════════════════════════════ */
+.dash-wrap{padding:28px 32px;max-width:1280px;margin:0 auto;}
+.page-title{font-size:22px;font-weight:800;margin-bottom:3px;}
+.page-sub{font-size:13px;color:var(--text-3);margin-bottom:22px;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.stat-icon{width:42px;height:42px;border-radius:10px;background:var(--green-icon);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.stat-badge{font-size:11px;font-weight:700;color:var(--green-dark);}
+.stat-label{font-size:13px;color:var(--text-3);margin-bottom:4px;}
+.stat-val{font-size:28px;font-weight:800;}
+.mid-grid{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:20px;}
+.chart-card,.qa-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.card-title{font-size:15px;font-weight:700;margin-bottom:16px;}
+.chart-area{position:relative;padding-left:28px;height:210px;}
+.y-axis{position:absolute;left:0;top:0;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
+.y-label{font-size:10px;color:var(--text-3);}
+.chart-bars{display:flex;align-items:flex-end;gap:10px;height:100%;position:relative;z-index:1;}
+.chart-grid-lines{position:absolute;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;}
+.grid-line{border-top:1px dashed var(--border);}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bar{background:var(--green);border-radius:5px 5px 0 0;width:100%;cursor:pointer;transition:opacity .15s;}
+.bar:hover{opacity:.75;}
+.bar-lbl{font-size:11px;color:var(--text-3);}
+.qa-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;border:1px solid var(--border);cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.qa-item:last-child{margin-bottom:0;}
+.qa-item:hover{border-color:var(--green);background:var(--green-light);}
+.qa-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.qa-label{font-size:13px;font-weight:600;}
+.activity-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;}
+.act-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:14px;}
+.act-row:last-child{border-bottom:none;padding-bottom:0;}
+.act-id{font-size:13px;font-weight:700;color:var(--blue);min-width:54px;cursor:pointer;}
+.act-name{font-size:13px;color:var(--text-2);flex:1;}
+.act-time{font-size:12px;color:var(--text-3);}
+.s-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.s-open{background:#e0eaff;color:#3b5bdb;}
+.s-submitted{background:#fef3c7;color:#b45309;}
+.s-ready{background:#dcfce7;color:#16a34a;}
+.footer{text-align:center;font-size:12px;color:var(--text-3);padding:14px;border-top:1px solid var(--border);background:var(--surface);}
+
+/* ─── AI SIDE PANEL (dashboard) ─── */
+.ai-drawer{position:fixed;top:54px;right:0;width:380px;height:calc(100vh - 54px);background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;z-index:40;box-shadow:-4px 0 24px rgba(0,0,0,.08);}
+.ai-drawer.open{transform:translateX(0);}
+.drawer-head{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--navy);}
+.drawer-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.drawer-sub{font-size:11px;color:rgba(255,255,255,.5);}
+.drawer-close{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.drawer-close:hover{background:rgba(255,255,255,.2);}
+.drawer-home{padding:14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:9px;}
+.drawer-greeting{background:var(--green-light);border-radius:10px;padding:13px 15px;}
+.drawer-greeting-title{font-size:13px;font-weight:700;margin-bottom:3px;}
+.drawer-greeting-sub{font-size:12px;color:var(--text-2);line-height:1.5;}
+.section-lbl{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.7px;margin-top:2px;}
+.action-card{display:flex;align-items:center;gap:11px;padding:13px 13px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;transition:all .18s;}
+.action-card:hover{border-color:var(--green);background:var(--green-light);transform:translateX(3px);}
+.action-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.action-title{font-size:13px;font-weight:700;}
+.action-desc{font-size:11px;color:var(--text-3);margin-top:1px;line-height:1.4;}
+.action-arr{margin-left:auto;color:var(--text-3);}
+
+/* drawer chat state */
+.drawer-chat{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.drawer-chat.visible{display:flex;}
+.drawer-back{padding:8px 14px;font-size:12px;color:var(--text-3);cursor:pointer;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:5px;}
+.drawer-back:hover{color:var(--text-1);}
+.drawer-progress{display:flex;gap:5px;padding:8px 14px 4px;flex-shrink:0;}
+.d-dot{width:7px;height:7px;border-radius:50%;background:var(--border);}
+.d-dot.done{background:var(--green);}
+.d-dot.cur{background:var(--navy);}
+.d-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;}
+.d-msg{font-size:13px;line-height:1.6;max-width:90%;}
+.d-msg.ai{background:var(--green-light);border-radius:4px 11px 11px 11px;padding:10px 12px;}
+.d-msg.user{background:var(--navy);border-radius:11px 4px 11px 11px;padding:10px 12px;color:#fff;align-self:flex-end;}
+.d-msg.sys{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:11px;color:var(--text-3);align-self:center;}
+.d-opts{display:flex;flex-direction:column;gap:5px;}
+.d-opt{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;cursor:pointer;font-size:13px;color:var(--text-2);transition:all .14s;}
+.d-opt:hover{border-color:var(--green);color:var(--text-1);}
+.d-opt.picked{border-color:var(--green);background:var(--green-light);font-weight:600;}
+.d-input-wrap{padding:11px;border-top:1px solid var(--border);flex-shrink:0;}
+.d-suggestions{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px;}
+.d-sugg{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text-2);cursor:pointer;transition:all .14s;}
+.d-sugg:hover{border-color:var(--green);}
+.d-row{display:flex;gap:7px;align-items:flex-end;}
+.d-input{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:8px 11px;font-size:13px;outline:none;resize:none;font-family:inherit;max-height:90px;transition:border-color .15s;}
+.d-input:focus{border-color:var(--green);}
+.d-send{width:34px;height:34px;background:var(--green);border:none;border-radius:8px;color:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+.d-send:hover{background:var(--green-dark);}
+
+/* generating in drawer */
+.d-generating{padding:16px;text-align:center;flex:1;overflow-y:auto;}
+.d-spinner{font-size:30px;animation:spin 2s linear infinite;display:inline-block;margin-bottom:8px;}
+.d-gen-steps{text-align:left;background:var(--bg);border-radius:10px;padding:12px;margin-top:10px;display:flex;flex-direction:column;gap:7px;}
+.d-step{display:flex;align-items:center;gap:8px;font-size:12px;}
+.d-step.done{color:#059669;}
+.d-step.active{color:var(--green-dark);}
+.d-step.todo{color:var(--text-3);}
+.prog-wrap{background:var(--border);border-radius:4px;height:5px;overflow:hidden;margin-top:10px;}
+.prog-fill{height:5px;background:var(--green);border-radius:4px;transition:width .4s ease;}
+
+/* ═══════════════════════════════════
+   CANVAS PAGE
+═══════════════════════════════════ */
+#page-canvas{display:none;height:calc(100vh - 54px);overflow:hidden;}
+#page-canvas.active{display:flex;flex-direction:column;}
+.canvas-topbar{background:var(--surface);border-bottom:1px solid var(--border);height:48px;display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;}
+.canvas-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2);cursor:pointer;padding:5px 10px;border-radius:7px;transition:all .15s;}
+.canvas-back:hover{background:var(--bg);color:var(--text-1);}
+.canvas-sep{width:1px;height:20px;background:var(--border);}
+.canvas-product-name{font-size:14px;font-weight:700;color:var(--text-1);}
+.canvas-product-code{font-size:12px;color:var(--text-3);margin-left:6px;}
+.canvas-spacer{flex:1;}
+.canvas-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#fef3c7;color:#b45309;}
+.canvas-actions{display:flex;gap:7px;}
+.cbtn{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+.cbtn-ghost{background:transparent;color:var(--text-2);border:1.5px solid var(--border);}
+.cbtn-ghost:hover{background:var(--bg);}
+.cbtn-primary{background:var(--green);color:var(--navy);}
+.cbtn-primary:hover{background:var(--green-dark);}
+
+/* canvas split layout */
+.canvas-body{display:flex;flex:1;overflow:hidden;}
+
+/* LEFT: AI chat */
+.canvas-chat-panel{width:340px;min-width:340px;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden;}
+.ccp-head{padding:13px 16px;border-bottom:1px solid var(--border);background:var(--navy);display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.ccp-title{font-size:13px;font-weight:700;color:#fff;flex:1;}
+.ccp-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75);}
+.ccp-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;}
+.cc-msg{font-size:13px;line-height:1.6;max-width:92%;}
+.cc-msg.ai{background:var(--green-light);border-radius:4px 11px 11px 11px;padding:10px 12px;}
+.cc-msg.user{background:var(--navy);border-radius:11px 4px 11px 11px;padding:10px 12px;color:#fff;align-self:flex-end;}
+.cc-msg.sys{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:11px;color:var(--text-3);align-self:center;text-align:center;}
+.ccp-input{padding:11px;border-top:1px solid var(--border);flex-shrink:0;}
+.cc-suggestions{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px;}
+.cc-sugg{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text-2);cursor:pointer;transition:all .14s;white-space:nowrap;}
+.cc-sugg:hover{border-color:var(--green);color:var(--text-1);}
+.cc-row{display:flex;gap:7px;align-items:flex-end;}
+.cc-input{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:8px 11px;font-size:13px;outline:none;resize:none;font-family:inherit;max-height:90px;transition:border-color .15s;}
+.cc-input:focus{border-color:var(--green);}
+.cc-send{width:34px;height:34px;background:var(--green);border:none;border-radius:8px;color:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+.cc-send:hover{background:var(--green-dark);}
+
+/* RIGHT: Canvas document */
+.canvas-doc{flex:1;overflow-y:auto;background:var(--bg);padding:0;}
+.canvas-doc-inner{max-width:860px;margin:0 auto;padding:28px 32px;}
+.doc-header{margin-bottom:24px;}
+.doc-product-title{font-size:24px;font-weight:800;color:var(--text-1);margin-bottom:5px;}
+.doc-meta{display:flex;gap:16px;font-size:12px;color:var(--text-3);flex-wrap:wrap;}
+.doc-meta-item{display:flex;align-items:center;gap:5px;}
+
+/* doc sections */
+.doc-section{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-bottom:14px;overflow:hidden;transition:border-color .3s;}
+.doc-section.ai-focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(62,207,142,.12);}
+.doc-section.ai-done{border-color:var(--green);}
+.doc-section-head{padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.doc-section-head:hover{background:var(--bg);}
+.doc-section-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.doc-section-title{font-size:14px;font-weight:700;flex:1;}
+.doc-section-sub{font-size:12px;color:var(--text-3);margin-top:1px;}
+.doc-section-status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.doc-ss-pending{background:var(--bg);color:var(--text-3);border:1px solid var(--border);}
+.doc-ss-active{background:#fef3c7;color:#b45309;border:1px solid #fde68a;display:flex;align-items:center;gap:5px;}
+.doc-ss-done{background:#dcfce7;color:#16a34a;border:1px solid #86efac;}
+.doc-ss-active-spinner{animation:spin 1s linear infinite;display:inline-block;}
+.doc-section-chevron{color:var(--text-3);font-size:12px;transition:transform .2s;}
+.doc-section-chevron.open{transform:rotate(90deg);}
+.doc-section-body{border-top:1px solid var(--border);padding:20px;}
+.doc-section-body.collapsed{display:none;}
+
+/* fields inside sections */
+.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.field-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px;}
+.field{background:var(--bg);border-radius:8px;padding:11px 13px;border:1px solid var(--border);}
+.field-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.field-value{font-size:13px;font-weight:600;color:var(--text-1);}
+.field-value.empty{color:var(--text-3);font-weight:400;font-style:italic;}
+.field-value.ai-typing{color:var(--green-dark);}
+.field.ai-highlight{border-color:var(--green);background:var(--green-light);}
+
+/* rate table */
+.rate-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.rate-tbl th{background:var(--bg);padding:9px 13px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);}
+.rate-tbl td{padding:11px 13px;border-top:1px solid var(--border);}
+.rate-tbl tr.highlight td{background:var(--green-light);}
+.rate-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--green-icon);color:var(--green-dark);}
+
+/* coverage cards */
+.cov-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.cov-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px;}
+.cov-card.active-cov{border-color:var(--green);}
+.cov-card-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.cov-toggle{width:18px;height:18px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0;}
+.cov-name{font-size:13px;font-weight:700;}
+.cov-limit{font-size:12px;color:var(--text-3);}
+
+/* exclusions */
+.excl-list{display:flex;flex-direction:column;gap:6px;}
+.excl-item{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);}
+.excl-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;margin-top:4px;flex-shrink:0;}
+.excl-text{font-size:13px;color:var(--text-2);}
+
+/* add-ons */
+.addon-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+.addon-card{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:12px;}
+.addon-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+.addon-premium{font-size:12px;color:var(--text-3);}
+
+/* ai typing cursor */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor{display:inline-block;width:2px;height:13px;background:var(--green-dark);border-radius:1px;margin-left:2px;animation:blink .8s infinite;vertical-align:middle;}
+
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease;}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:300;transition:transform .3s ease;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  <div class="logo" onclick="goDashboard()">
+    <div class="logo-icon">🌿</div>
+    <span class="logo-text">NEXT-GEN</span>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" id="navDash" onclick="goDashboard()">Dashboard</div>
+    <div class="nav-item" onclick="toast('Product module coming soon')">Product</div>
+    <div class="nav-item" onclick="toast('Pre-Configuration coming soon')">Pre-Configuration ▾</div>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="topbar-actions">
+    <button class="ai-fab" id="aiBtn" onclick="toggleDrawer()">✨ AI Assist</button>
+    <button class="icon-action"><span>🔔</span><span class="notif-dot"></span></button>
+    <button class="lang-btn">EN ▾</button>
+    <div class="avatar">PD</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     DASHBOARD PAGE
+═══════════════════════════════════ -->
+<div id="page-dash" class="page active">
+  <div class="dash-wrap">
+    <div class="page-title">Insurance Product Configurator Dashboard</div>
+    <div class="page-sub">Overview of your insurance products and applications</div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon">📄</div><span class="stat-badge">↗ 12.5%</span></div>
+        <div class="stat-label">Total Products</div><div class="stat-val">45</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon">🕐</div><span class="stat-badge" style="color:var(--text-3)">—</span></div>
+        <div class="stat-label">Total Applications</div><div class="stat-val">105</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon">📈</div><span class="stat-badge">↗ 8.3%</span></div>
+        <div class="stat-label">Approved Products</div><div class="stat-val">32</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><div class="stat-icon">✅</div><span class="stat-badge">↗ 15.2%</span></div>
+        <div class="stat-label">Under Review</div><div class="stat-val">12</div>
+      </div>
+    </div>
+
+    <div class="mid-grid">
+      <div class="chart-card">
+        <div class="card-title">Application Trend — Top 10 products</div>
+        <div class="chart-area">
+          <div class="y-axis">
+            <span class="y-label">80</span><span class="y-label">60</span>
+            <span class="y-label">40</span><span class="y-label">20</span><span class="y-label">0</span>
+          </div>
+          <div style="flex:1;position:relative;height:100%;">
+            <div class="chart-grid-lines">
+              <div class="grid-line"></div><div class="grid-line"></div>
+              <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+            </div>
+            <div class="chart-bars">
+              <div class="bar-col"><div class="bar" style="height:54%"></div><span class="bar-lbl">Motor</span></div>
+              <div class="bar-col"><div class="bar" style="height:65%"></div><span class="bar-lbl">Home</span></div>
+              <div class="bar-col"><div class="bar" style="height:76%"></div><span class="bar-lbl">Vehicle</span></div>
+              <div class="bar-col"><div class="bar" style="height:59%"></div><span class="bar-lbl">Fire</span></div>
+              <div class="bar-col"><div class="bar" style="height:84%"></div><span class="bar-lbl">Fleet</span></div>
+              <div class="bar-col"><div class="bar" style="height:80%"></div><span class="bar-lbl">GCCV</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="qa-card">
+        <div class="card-title">Quick actions</div>
+        <div class="qa-item" onclick="openDrawerFlow('create')"><div class="qa-icon" style="background:#e0f2fe">📝</div><span class="qa-label">Create Application</span></div>
+        <div class="qa-item" onclick="openDrawerFlow('ask')"><div class="qa-icon" style="background:#ede9fe">📊</div><span class="qa-label">View Reports</span></div>
+        <div class="qa-item" onclick="toast('Opening review queue…')"><div class="qa-icon" style="background:#fef3c7">⚠️</div><span class="qa-label">Review Pending</span></div>
+        <div class="qa-item" onclick="toast('Opening claims…')"><div class="qa-icon" style="background:#dcfce7">✅</div><span class="qa-label">Approve Claims</span></div>
+      </div>
+    </div>
+
+    <div class="activity-card">
+      <div class="card-title">Recent Activity</div>
+      <div class="act-row"><span class="act-id" onclick="openCanvas()">102364</span><span class="act-name">GCCV</span><span class="s-badge s-open">Open</span><span class="act-time">2 hours ago</span></div>
+      <div class="act-row"><span class="act-id" onclick="openCanvas()">102363</span><span class="act-name">SAOD</span><span class="s-badge s-submitted">Submitted</span><span class="act-time">4 hours ago</span></div>
+      <div class="act-row"><span class="act-id" onclick="openCanvas()">102362</span><span class="act-name">SAOD</span><span class="s-badge s-ready">Ready</span><span class="act-time">6 hours ago</span></div>
+      <div class="act-row"><span class="act-id" onclick="openCanvas()">102361</span><span class="act-name">SAOD</span><span class="s-badge s-open">Open</span><span class="act-time">8 hours ago</span></div>
+    </div>
+  </div>
+  <div class="footer">All Rights Reserved. Copyright © Azentio Pvt. Ltd.</div>
+</div>
+
+<!-- ═══════════════════════════════════
+     CANVAS PAGE
+═══════════════════════════════════ -->
+<div id="page-canvas" class="page">
+  <!-- canvas sub-topbar -->
+  <div class="canvas-topbar">
+    <div class="canvas-back" onclick="goDashboard()">← Dashboard</div>
+    <div class="canvas-sep"></div>
+    <span class="canvas-product-name">Comprehensive Motor</span>
+    <span class="canvas-product-code">UAE-MTR-007</span>
+    <div class="canvas-spacer"></div>
+    <span class="canvas-status">Draft · Pending Review</span>
+    <div class="canvas-actions">
+      <button class="cbtn cbtn-ghost" onclick="toast('Saved as draft')">💾 Save Draft</button>
+      <button class="cbtn cbtn-primary" onclick="toast('Submitted for approval')">Submit for Approval →</button>
+    </div>
+  </div>
+
+  <div class="canvas-body">
+
+    <!-- LEFT: Canvas Document -->
+    <div class="canvas-doc">
+      <div class="canvas-doc-inner">
+
+        <div class="doc-header">
+          <div class="doc-product-title">Comprehensive Motor Insurance</div>
+          <div class="doc-meta">
+            <div class="doc-meta-item">📋 <span>UAE-MTR-007</span></div>
+            <div class="doc-meta-item">🌍 <span>United Arab Emirates</span></div>
+            <div class="doc-meta-item">📅 <span>Effective 01 Jan 2027</span></div>
+            <div class="doc-meta-item">💰 <span>AED</span></div>
+          </div>
+        </div>
+
+        <!-- SECTION: Overview -->
+        <div class="doc-section ai-done" id="sec-overview">
+          <div class="doc-section-head" onclick="toggleSection('overview-body','overview-chev')">
+            <div class="doc-section-icon" style="background:#e0f2fe;">📋</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Product Overview</div>
+              <div class="doc-section-sub">Core product identity and market settings</div>
+            </div>
+            <span class="doc-section-status doc-ss-done">✓ Complete</span>
+            <span class="doc-section-chevron open" id="overview-chev">›</span>
+          </div>
+          <div class="doc-section-body" id="overview-body">
+            <div class="field-grid">
+              <div class="field"><div class="field-label">Product Code</div><div class="field-value">UAE-MTR-007</div></div>
+              <div class="field"><div class="field-label">Product Name</div><div class="field-value">Comprehensive Motor</div></div>
+              <div class="field"><div class="field-label">Category</div><div class="field-value">Motor Insurance</div></div>
+              <div class="field"><div class="field-label">Market</div><div class="field-value">United Arab Emirates</div></div>
+              <div class="field"><div class="field-label">Currency</div><div class="field-value">AED</div></div>
+              <div class="field"><div class="field-label">Structure</div><div class="field-value">Standard Comprehensive</div></div>
+            </div>
+            <div class="field-grid">
+              <div class="field"><div class="field-label">Effective Date</div><div class="field-value">01 January 2027</div></div>
+              <div class="field"><div class="field-label">Expiry Date</div><div class="field-value">31 December 2027</div></div>
+              <div class="field"><div class="field-label">Regulatory Body</div><div class="field-value">UAE Insurance Authority</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Rates -->
+        <div class="doc-section" id="sec-rates">
+          <div class="doc-section-head" onclick="aiDefineSection('rates')">
+            <div class="doc-section-icon" style="background:#fef3c7;">📊</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Rates & Premiums</div>
+              <div class="doc-section-sub">Base rates, loadings, discounts, and tax components</div>
+            </div>
+            <span class="doc-section-status doc-ss-pending" id="rates-status">Pending</span>
+            <span class="doc-section-chevron" id="rates-chev">›</span>
+          </div>
+          <div class="doc-section-body collapsed" id="rates-body">
+            <div class="table-wrap" style="overflow:hidden;border-radius:8px;border:1px solid var(--border);">
+              <table class="rate-tbl">
+                <thead><tr><th>Component</th><th>Type</th><th>Basis</th><th>Value</th><th>Source</th></tr></thead>
+                <tbody id="rates-tbody">
+                  <tr class="highlight"><td>Base Premium Rate</td><td>Percentage</td><td>Sum Insured</td><td><strong>2.5%</strong></td><td><span class="rate-badge">✨ AI</span></td></tr>
+                  <tr class="highlight"><td>VAT Rate</td><td>Tax</td><td>Total Premium</td><td><strong>15%</strong></td><td><span class="rate-badge">✨ AI</span></td></tr>
+                  <tr class="highlight"><td>No Claims Bonus</td><td>Discount</td><td>Base Premium</td><td><strong>Up to 25%</strong></td><td><span class="rate-badge">✨ AI</span></td></tr>
+                  <tr class="highlight"><td>Young Driver Loading</td><td>Loading</td><td>Base Premium</td><td><strong>+30%</strong></td><td><span class="rate-badge">✨ AI</span></td></tr>
+                  <tr class="highlight"><td>Min. Premium</td><td>Fixed Floor</td><td>Per Policy</td><td><strong>AED 800</strong></td><td><span class="rate-badge">✨ AI</span></td></tr>
+                  <tr class="highlight"><td>Policy Fee</td><td>Fixed</td><td>Per Policy</td><td><strong>AED 50</strong></td><td><span class="rate-badge">✨ AI</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Coverages -->
+        <div class="doc-section" id="sec-coverages">
+          <div class="doc-section-head" onclick="aiDefineSection('coverages')">
+            <div class="doc-section-icon" style="background:#dcfce7;">🛡️</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Coverages</div>
+              <div class="doc-section-sub">Included covers, limits, and sub-limits</div>
+            </div>
+            <span class="doc-section-status doc-ss-pending" id="coverages-status">Pending</span>
+            <span class="doc-section-chevron" id="coverages-chev">›</span>
+          </div>
+          <div class="doc-section-body collapsed" id="coverages-body">
+            <div class="cov-grid" id="cov-grid">
+              <div class="cov-card active-cov"><div class="cov-card-head"><div class="cov-toggle">✓</div><span class="cov-name">Third-Party Liability</span></div><div class="cov-limit">Up to AED 1,000,000</div></div>
+              <div class="cov-card active-cov"><div class="cov-card-head"><div class="cov-toggle">✓</div><span class="cov-name">Own Damage</span></div><div class="cov-limit">Market value of vehicle</div></div>
+              <div class="cov-card active-cov"><div class="cov-card-head"><div class="cov-toggle">✓</div><span class="cov-name">Personal Accident</span></div><div class="cov-limit">AED 200,000 per person</div></div>
+              <div class="cov-card active-cov"><div class="cov-card-head"><div class="cov-toggle">✓</div><span class="cov-name">Medical Expenses</span></div><div class="cov-limit">AED 10,000 per incident</div></div>
+              <div class="cov-card active-cov"><div class="cov-card-head"><div class="cov-toggle">✓</div><span class="cov-name">Emergency Roadside</span></div><div class="cov-limit">Included — 24/7</div></div>
+              <div class="cov-card active-cov"><div class="cov-card-head"><div class="cov-toggle">✓</div><span class="cov-name">Natural Perils</span></div><div class="cov-limit">Flood, hail, sandstorm</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Rules -->
+        <div class="doc-section" id="sec-rules">
+          <div class="doc-section-head" onclick="aiDefineSection('rules')">
+            <div class="doc-section-icon" style="background:#ede9fe;">📏</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Rules & Conditions</div>
+              <div class="doc-section-sub">Underwriting rules, eligibility, and policy conditions</div>
+            </div>
+            <span class="doc-section-status doc-ss-pending" id="rules-status">Pending</span>
+            <span class="doc-section-chevron" id="rules-chev">›</span>
+          </div>
+          <div class="doc-section-body collapsed" id="rules-body">
+            <div class="field-grid-2">
+              <div class="field"><div class="field-label">Min Driver Age</div><div class="field-value">21 years</div></div>
+              <div class="field"><div class="field-label">Max Vehicle Age</div><div class="field-value">15 years</div></div>
+              <div class="field"><div class="field-label">Max Sum Insured</div><div class="field-value">AED 500,000</div></div>
+              <div class="field"><div class="field-label">Inspection Required</div><div class="field-value">Vehicles &gt; 5 years old</div></div>
+              <div class="field"><div class="field-label">Deductible (Own Damage)</div><div class="field-value">AED 500 or 2%, whichever higher</div></div>
+              <div class="field"><div class="field-label">Policy Period</div><div class="field-value">12 months</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Exclusions -->
+        <div class="doc-section" id="sec-exclusions">
+          <div class="doc-section-head" onclick="aiDefineSection('exclusions')">
+            <div class="doc-section-icon" style="background:#fee2e2;">⛔</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Exclusions</div>
+              <div class="doc-section-sub">What is not covered under this product</div>
+            </div>
+            <span class="doc-section-status doc-ss-pending" id="exclusions-status">Pending</span>
+            <span class="doc-section-chevron" id="exclusions-chev">›</span>
+          </div>
+          <div class="doc-section-body collapsed" id="exclusions-body">
+            <div class="excl-list">
+              <div class="excl-item"><div class="excl-dot"></div><span class="excl-text">Damage caused while driving under the influence of alcohol or drugs</span></div>
+              <div class="excl-item"><div class="excl-dot"></div><span class="excl-text">Racing, speed testing, or off-road use not covered by standard policy</span></div>
+              <div class="excl-item"><div class="excl-dot"></div><span class="excl-text">Mechanical or electrical breakdown not resulting from an accident</span></div>
+              <div class="excl-item"><div class="excl-dot"></div><span class="excl-text">Damage to tyres unless the vehicle body is also damaged in the same incident</span></div>
+              <div class="excl-item"><div class="excl-dot"></div><span class="excl-text">Loss of use or consequential losses not covered</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Add-ons -->
+        <div class="doc-section" id="sec-addons">
+          <div class="doc-section-head" onclick="aiDefineSection('addons')">
+            <div class="doc-section-icon" style="background:#e0f2fe;">🔌</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Add-on Covers</div>
+              <div class="doc-section-sub">Optional extensions available for this product</div>
+            </div>
+            <span class="doc-section-status doc-ss-pending" id="addons-status">Pending</span>
+            <span class="doc-section-chevron" id="addons-chev">›</span>
+          </div>
+          <div class="doc-section-body collapsed" id="addons-body">
+            <div class="addon-grid">
+              <div class="addon-card"><div class="addon-name">🚘 Hire Car</div><div class="addon-premium">+AED 200/year</div></div>
+              <div class="addon-card"><div class="addon-name">🔧 Agency Repair</div><div class="addon-premium">+AED 500/year</div></div>
+              <div class="addon-card"><div class="addon-name">🌍 GCC Extension</div><div class="addon-premium">+AED 150/year</div></div>
+              <div class="addon-card"><div class="addon-name">🪟 Windscreen</div><div class="addon-premium">+AED 100/year</div></div>
+              <div class="addon-card"><div class="addon-name">🔒 Theft Extension</div><div class="addon-premium">+AED 300/year</div></div>
+              <div class="addon-card"><div class="addon-name">📱 Telematics</div><div class="addon-premium">+AED 250/year</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: Documents -->
+        <div class="doc-section" id="sec-docs">
+          <div class="doc-section-head" onclick="aiDefineSection('docs')">
+            <div class="doc-section-icon" style="background:#f0fdf4;">📄</div>
+            <div style="flex:1;">
+              <div class="doc-section-title">Policy Documents</div>
+              <div class="doc-section-sub">Wordings, schedules, and regulatory filings</div>
+            </div>
+            <span class="doc-section-status doc-ss-pending" id="docs-status">Pending</span>
+            <span class="doc-section-chevron" id="docs-chev">›</span>
+          </div>
+          <div class="doc-section-body collapsed" id="docs-body">
+            <div class="field-grid-2">
+              <div class="field"><div class="field-label">Policy Wording</div><div class="field-value empty">Not attached yet</div></div>
+              <div class="field"><div class="field-label">Schedule Template</div><div class="field-value empty">Not attached yet</div></div>
+              <div class="field"><div class="field-label">Regulatory Filing</div><div class="field-value empty">Pending UAE-IA submission</div></div>
+              <div class="field"><div class="field-label">Arabic Version</div><div class="field-value empty">Translation pending</div></div>
+            </div>
+            <button style="margin-top:6px;padding:8px 16px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;font-size:13px;color:var(--text-2);cursor:pointer;">+ Attach Document</button>
+          </div>
+        </div>
+
+      </div><!-- /canvas-doc-inner -->
+    </div><!-- /canvas-doc -->
+
+    <!-- RIGHT: AI Chat -->
+    <div class="canvas-chat-panel">
+      <div class="ccp-head">
+        <span style="font-size:16px;">✨</span>
+        <div style="flex:1;">
+          <div class="ccp-title">AI Assist</div>
+        </div>
+        <span class="ccp-badge" id="ccpBadge">Ready</span>
+      </div>
+      <div class="ccp-msgs" id="ccpMsgs">
+        <div class="cc-msg ai">I've opened your product canvas. I can help you define each section — rates, coverages, rules, exclusions, and add-ons.<br><br>Which section would you like to work on?</div>
+        <div class="cc-msg sys">Click any section on the right, or ask me below</div>
+      </div>
+      <div class="ccp-input">
+        <div class="cc-suggestions" id="ccSuggs">
+          <div class="cc-sugg" onclick="aiDefineSection('rates')">Define rates</div>
+          <div class="cc-sugg" onclick="aiDefineSection('coverages')">Set coverages</div>
+          <div class="cc-sugg" onclick="aiDefineSection('rules')">Add rules</div>
+          <div class="cc-sugg" onclick="aiDefineSection('exclusions')">Add exclusions</div>
+        </div>
+        <div class="cc-row">
+          <textarea class="cc-input" rows="1" id="ccInput" placeholder="Ask AI to fill in a section…"></textarea>
+          <button class="cc-send" onclick="sendCanvasMsg()">→</button>
+        </div>
+      </div>
+    </div>
+
+
+  </div><!-- /canvas-body -->
+</div><!-- /page-canvas -->
+
+<!-- ─── AI DRAWER (dashboard) ─── -->
+<div class="ai-drawer" id="aiDrawer">
+  <div class="drawer-head">
+    <span style="font-size:15px;">✨</span>
+    <div style="flex:1;"><div class="drawer-title" id="drawerTitle">AI Assist</div><div class="drawer-sub" id="drawerSub">ORI · Product Configurator</div></div>
+    <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="dstate-home" class="drawer-home">
+    <div class="drawer-greeting">
+      <div class="drawer-greeting-title">👋 Hi Poojitha!</div>
+      <div class="drawer-greeting-sub">What would you like to do today?</div>
+    </div>
+    <div class="section-lbl">Actions</div>
+    <div class="action-card" onclick="drawerFlow('create')"><div class="action-icon" style="background:var(--green-icon)">🆕</div><div style="flex:1;"><div class="action-title">Create a Product</div><div class="action-desc">Build a new product with AI guidance</div></div><span class="action-arr">→</span></div>
+    <div class="action-card" onclick="drawerFlow('amend')"><div class="action-icon" style="background:#fef3c7">✏️</div><div style="flex:1;"><div class="action-title">Amend a Product</div><div class="action-desc">Update rates, coverages or rules</div></div><span class="action-arr">→</span></div>
+    <div class="action-card" onclick="drawerFlow('clone')"><div class="action-icon" style="background:#dbeafe">📋</div><div style="flex:1;"><div class="action-title">Clone to Market</div><div class="action-desc">Copy with AI localisation</div></div><span class="action-arr">→</span></div>
+    <div class="action-card" onclick="drawerFlow('ask')"><div class="action-icon" style="background:#ede9fe">💬</div><div style="flex:1;"><div class="action-title">Ask a Question</div><div class="action-desc">Query rates, rules, compliance</div></div><span class="action-arr">→</span></div>
+  </div>
+
+  <!-- CHAT flows -->
+  <div id="dstate-chat" class="drawer-chat">
+    <div class="drawer-back" onclick="drawerGoHome()">← Back</div>
+    <div class="drawer-progress" id="dProgress">
+      <div class="d-dot cur"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div>
+    </div>
+    <div class="d-msgs" id="dMsgs"></div>
+    <div class="d-input-wrap">
+      <div class="d-suggestions" id="dSuggs"></div>
+      <div class="d-row">
+        <textarea class="d-input" rows="1" id="dInput" placeholder="Type or choose above…"></textarea>
+        <button class="d-send" onclick="dSend()">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATING -->
+  <div id="dstate-gen" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="d-generating">
+      <div class="d-spinner">✨</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:5px;">Generating product…</div>
+      <div style="font-size:12px;color:var(--text-3);">Analysing UAE market &amp; regulations</div>
+      <div class="d-gen-steps">
+        <div class="d-step done">✓ Motor Insurance — UAE</div>
+        <div class="d-step done">✓ Standard Comprehensive</div>
+        <div class="d-step done">✓ Regulatory clauses loaded</div>
+        <div class="d-step active" id="dGenStep">⟳ Configuring rates &amp; VAT…</div>
+        <div class="d-step todo">○ Building coverage matrix</div>
+      </div>
+      <div class="prog-wrap" style="margin-top:10px;"><div class="prog-fill" id="dProgFill" style="width:65%"></div></div>
+      <div style="text-align:right;font-size:11px;color:var(--text-3);margin-top:4px;" id="dProgPct">65%</div>
+    </div>
+  </div>
+
+  <!-- DONE / OPEN -->
+  <div id="dstate-done" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div style="padding:16px;flex:1;overflow-y:auto;">
+      <div style="text-align:center;padding:14px 0 10px;"><div style="font-size:36px;margin-bottom:8px;">🎉</div><div style="font-size:15px;font-weight:700;margin-bottom:3px;">Product Created!</div><div style="font-size:12px;color:var(--text-3);">Ready to define in Canvas</div></div>
+      <div style="background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">✓ New Product</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid rgba(62,207,142,.2);padding-bottom:4px;"><span style="color:var(--text-3)">Code</span><span style="font-weight:600;">UAE-MTR-007</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid rgba(62,207,142,.2);padding-bottom:4px;margin-top:4px;"><span style="color:var(--text-3)">Type</span><span style="font-weight:600;">Motor Insurance</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px;"><span style="color:var(--text-3)">Market</span><span style="font-weight:600;">UAE</span></div>
+        </div>
+      </div>
+      <button onclick="openCanvas()" style="width:100%;padding:11px;background:var(--green);color:var(--navy);border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;">Open in Canvas →</button>
+      <button onclick="drawerGoHome()" style="width:100%;padding:10px;background:transparent;color:var(--text-2);border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">Back to Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── PAGE NAV ── */
+function goDashboard() {
+  document.getElementById('page-dash').classList.add('active');
+  document.getElementById('page-canvas').classList.remove('active');
+  document.getElementById('page-dash').style.display = '';
+  document.getElementById('page-canvas').style.display = 'none';
+}
+function openCanvas() {
+  closeDrawer();
+  document.getElementById('page-dash').classList.remove('active');
+  document.getElementById('page-dash').style.display = 'none';
+  document.getElementById('page-canvas').classList.add('active');
+  document.getElementById('page-canvas').style.display = 'flex';
+  // trigger AI to start section-by-section fill
+  setTimeout(() => autoFillCanvas(), 800);
+}
+
+/* ── DRAWER ── */
+let drawerOpen = false;
+function toggleDrawer() {
+  drawerOpen = !drawerOpen;
+  document.getElementById('aiDrawer').classList.toggle('open', drawerOpen);
+  document.getElementById('aiBtn').style.background = drawerOpen ? 'var(--green-dark)' : '';
+}
+function closeDrawer() { drawerOpen = false; document.getElementById('aiDrawer').classList.remove('open'); document.getElementById('aiBtn').style.background = ''; }
+function openDrawerFlow(f) { if(!drawerOpen) toggleDrawer(); drawerFlow(f); }
+
+/* ── DRAWER STATE ── */
+let dStep = 1, dAnswers = {};
+const dStates = ['home','chat','gen','done'];
+function dShow(s) { dStates.forEach(id => { const el = document.getElementById('dstate-'+id); if(el){ el.style.display='none'; } }); const t = document.getElementById('dstate-'+s); if(t){ t.style.display='flex'; t.style.flexDirection='column'; } }
+
+function drawerGoHome() { dStep=1; dAnswers={}; document.getElementById('drawerTitle').textContent='AI Assist'; document.getElementById('drawerSub').textContent='ORI · Product Configurator'; dShow('home'); }
+
+const dFlows = {
+  create: {
+    title: 'Create a Product',
+    steps: [
+      { q:'What type of insurance product?', opts:['🚗 Motor Insurance','🏥 Health Insurance','🏠 Property Insurance','✈️ Travel Insurance','🌊 Marine Insurance'] },
+      { q:'Which market?', opts:['🇦🇪 UAE','🇸🇦 Saudi Arabia','🇶🇦 Qatar','🇰🇼 Kuwait'] },
+      { q:'Coverage structure?', opts:['Standard Comprehensive','Fleet & Commercial','Usage-Based (UBI)','Custom'] },
+      { q:'Effective date?', opts:['01 Jan 2027','01 Apr 2026','01 Jul 2026','Custom date'] }
+    ]
+  },
+  amend: { title:'Amend a Product', steps:[{ q:'Select product to amend:', opts:['🚗 UAE-MTR-001 · Comprehensive Motor','🏥 UAE-HLT-002 · Group Health Shield','✈️ UAE-TRV-004 · Travel Secure Annual']},{ q:'What change do you need?', opts:['📊 Rate/Premium change','🏷️ VAT/Tax update','📋 Coverage rule update','⛔ Add/Remove exclusion']}]},
+  clone: { title:'Clone to Market', steps:[{ q:'Source product?', opts:['UAE-MTR-001 · Motor (UAE)','UAE-HLT-002 · Health (UAE)']},{ q:'Target market?', opts:['🇸🇦 Saudi Arabia','🇶🇦 Qatar','🇰🇼 Kuwait','🇧🇭 Bahrain']}]},
+  ask: { title:'Ask AI', steps:[]}
+};
+
+function drawerFlow(f) {
+  const flow = dFlows[f];
+  if (!flow) return;
+  dShow('chat');
+  document.getElementById('drawerTitle').textContent = flow.title;
+  document.getElementById('drawerSub').textContent = f === 'create' ? 'Step 1 of '+flow.steps.length : 'AI-guided';
+  const msgs = document.getElementById('dMsgs');
+  msgs.innerHTML = '';
+  dStep = 1;
+  if (f === 'ask') {
+    addDMsg('ai', 'Ask me anything about your products — rates, rules, coverages, or compliance.');
+    document.getElementById('dSuggs').innerHTML = ['UAE VAT rate for motor?','Products pending review?','Coverage limits for health?'].map(s=>`<div class="d-sugg" onclick="quickAsk('${s}')">${s}</div>`).join('');
+    updateDProgress(1, 1);
+    return;
+  }
+  updateDProgress(1, flow.steps.length);
+  addDMsg('ai', `<strong>${flow.steps[0].q}</strong>`);
+  renderDOpts(flow.steps[0].opts, f, 0);
+  document.getElementById('dSuggs').innerHTML = '';
+}
+
+function addDMsg(type, html) {
+  const msgs = document.getElementById('dMsgs');
+  const el = document.createElement('div');
+  el.className = 'd-msg '+type+' fade-in';
+  el.innerHTML = html;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function renderDOpts(opts, flow, stepIdx) {
+  const msgs = document.getElementById('dMsgs');
+  const wrap = document.createElement('div');
+  wrap.className = 'd-opts fade-in';
+  opts.forEach(o => {
+    const el = document.createElement('div');
+    el.className = 'd-opt';
+    el.textContent = o;
+    el.onclick = () => dPickOpt(el, o, flow, stepIdx);
+    wrap.appendChild(el);
+  });
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function dPickOpt(el, val, flow, stepIdx) {
+  el.closest('.d-opts').querySelectorAll('.d-opt').forEach(d=>d.classList.remove('picked'));
+  el.classList.add('picked');
+  dAnswers['step'+dStep] = val;
+  setTimeout(() => dAdvance(val, flow, stepIdx), 280);
+}
+
+function dAdvance(val, flow, stepIdx) {
+  const flowDef = dFlows[flow];
+  addDMsg('user', val);
+  const nextIdx = stepIdx + 1;
+  dStep++;
+  updateDProgress(dStep, flowDef.steps.length);
+  document.getElementById('drawerSub').textContent = `Step ${Math.min(dStep, flowDef.steps.length)} of ${flowDef.steps.length}`;
+  if (nextIdx >= flowDef.steps.length) {
+    setTimeout(() => {
+      if (flow === 'create') {
+        addDMsg('ai', 'Got it! Generating your product…');
+        setTimeout(() => { dShow('gen'); animateDGen(); }, 500);
+      } else {
+        addDMsg('ai', '✅ Done! Changes have been queued for review.');
+        document.getElementById('dSuggs').innerHTML = `<div class="d-sugg" onclick="drawerGoHome()">← Back to Home</div>`;
+      }
+    }, 300);
+    return;
+  }
+  setTimeout(() => {
+    addDMsg('ai', `<strong>${flowDef.steps[nextIdx].q}</strong>`);
+    renderDOpts(flowDef.steps[nextIdx].opts, flow, nextIdx);
+  }, 350);
+}
+
+function updateDProgress(cur, total) {
+  const wrap = document.getElementById('dProgress');
+  wrap.innerHTML = '';
+  for (let i=0; i<total; i++) {
+    const d = document.createElement('div');
+    d.className = 'd-dot' + (i < cur-1 ? ' done' : i === cur-1 ? ' cur' : '');
+    wrap.appendChild(d);
+  }
+}
+
+function dSend() {
+  const inp = document.getElementById('dInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = '';
+  addDMsg('user', val);
+  setTimeout(() => addDMsg('ai', 'Let me look into that…'), 400);
+}
+
+function quickAsk(q) {
+  addDMsg('user', q);
+  const answers = {
+    'UAE VAT rate for motor?': 'Current VAT rate for motor insurance in <strong>UAE</strong> is <strong>12%</strong>. A regulatory update may increase this to 15% in Q2 2026.',
+    'Products pending review?': 'You have <strong>12 products</strong> under review. Most recent: UAE-MTR-001, UAE-HLT-002.',
+    'Coverage limits for health?': 'Group Health Shield (UAE-HLT-002) has a max cover of <strong>AED 1,000,000</strong> per insured per year.'
+  };
+  setTimeout(() => addDMsg('ai', answers[q] || 'Let me check that for you…'), 450);
+}
+
+function animateDGen() {
+  let pct = 65;
+  const fill = document.getElementById('dProgFill');
+  const pctEl = document.getElementById('dProgPct');
+  const step = document.getElementById('dGenStep');
+  const iv = setInterval(() => {
+    pct += Math.random() * 9;
+    if (pct >= 100) {
+      pct = 100; clearInterval(iv);
+      fill.style.width = '100%'; pctEl.textContent = '100%';
+      step.className = 'd-step done'; step.textContent = '✓ Rates & VAT configured';
+      setTimeout(() => { dShow('done'); toast('✓ Product UAE-MTR-007 created'); }, 600);
+    } else { fill.style.width = pct+'%'; pctEl.textContent = Math.round(pct)+'%'; }
+  }, 380);
+}
+
+/* ── CANVAS AI FILL ── */
+const sectionOrder = ['rates','coverages','rules','exclusions','addons'];
+let fillIdx = 0;
+const sectionMsgs = {
+  rates: 'I\'ll populate the <strong>Rates & Premiums</strong> section based on UAE motor insurance regulations and standard market data.',
+  coverages: 'Now filling in <strong>Coverages</strong> — standard comprehensive UAE motor includes 6 core covers.',
+  rules: 'Adding <strong>Rules & Conditions</strong> — UAE Insurance Authority underwriting guidelines applied.',
+  exclusions: 'Populating standard <strong>Exclusions</strong> as per UAE motor insurance policy wording.',
+  addons: 'Adding available <strong>Add-on Covers</strong> for this product.',
+};
+
+function autoFillCanvas() {
+  if (fillIdx >= sectionOrder.length) {
+    addCanvasMsg('ai', '✅ All sections are now populated. Review each section, make any edits, then submit for approval.');
+    document.getElementById('ccpBadge').textContent = 'Done';
+    document.getElementById('ccSuggs').innerHTML = ['Submit for approval','View rate summary','Export PDF'].map(s=>`<div class="cc-sugg">${s}</div>`).join('');
+    return;
+  }
+  const sec = sectionOrder[fillIdx];
+  addCanvasMsg('ai', sectionMsgs[sec]);
+  aiDefineSection(sec);
+  fillIdx++;
+  setTimeout(autoFillCanvas, 2200);
+}
+
+function aiDefineSection(sec) {
+  const secEl = document.getElementById('sec-'+sec);
+  const statusEl = document.getElementById(sec+'-status');
+  const chevEl = document.getElementById(sec+'-chev');
+  const bodyEl = document.getElementById(sec+'-body');
+  if (!secEl) return;
+
+  // Focus
+  document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('ai-focus'));
+  secEl.classList.add('ai-focus');
+  secEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  // Set active status
+  statusEl.className = 'doc-section-status doc-ss-active';
+  statusEl.innerHTML = '<span class="doc-ss-active-spinner">⟳</span> AI filling…';
+
+  // Expand
+  bodyEl.classList.remove('collapsed');
+  chevEl.classList.add('open');
+
+  setTimeout(() => {
+    statusEl.className = 'doc-section-status doc-ss-done';
+    statusEl.textContent = '✓ Complete';
+    secEl.classList.remove('ai-focus');
+    secEl.classList.add('ai-done');
+    addCanvasMsg('sys', '✓ '+sec.charAt(0).toUpperCase()+sec.slice(1)+' section filled');
+  }, 1600);
+}
+
+function toggleSection(bodyId, chevId) {
+  const body = document.getElementById(bodyId);
+  const chev = document.getElementById(chevId);
+  if (!body) return;
+  body.classList.toggle('collapsed');
+  if (chev) chev.classList.toggle('open');
+}
+
+function addCanvasMsg(type, html) {
+  const msgs = document.getElementById('ccpMsgs');
+  const el = document.createElement('div');
+  el.className = 'cc-msg '+type+' fade-in';
+  el.innerHTML = html;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendCanvasMsg() {
+  const inp = document.getElementById('ccInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = '';
+  addCanvasMsg('user', val);
+  setTimeout(() => addCanvasMsg('ai', 'On it! Updating the relevant section…'), 450);
+}
+
+/* ── TOAST ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; }, 3200);
+}
+
+// Auto-resize textareas
+document.addEventListener('input', e => {
+  if (e.target.tagName==='TEXTAREA') { e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,90)+'px'; }
+});
+</script>
+</body>
+</html>
